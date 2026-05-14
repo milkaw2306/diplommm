@@ -1,8 +1,12 @@
-﻿using System.Windows;
+﻿using System;
+using System.Linq;
+using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
-using Diploma.ViewModels;
 using Diploma.Models;
+using Diploma.ViewModels;
+using Diploma.Views;
+using MaterialDesignThemes.Wpf;
 
 namespace Diploma.Views
 {
@@ -13,9 +17,9 @@ namespace Diploma.Views
         public MainWindow()
         {
             InitializeComponent();
-            KeyDown += Window_KeyDown;
         }
 
+        // Выход из приложения
         private void Exit_Click(object sender, RoutedEventArgs e)
         {
             var result = MessageBox.Show("Вы уверены, что хотите выйти?", "Выход",
@@ -23,107 +27,122 @@ namespace Diploma.Views
 
             if (result == MessageBoxResult.Yes)
             {
-                new LoginWindow().Show();
-                this.Close();
+                Application.Current.Shutdown();
             }
         }
 
-        private void About_Click(object sender, RoutedEventArgs e)
-        {
-            MessageBox.Show(
-                "Photo Drive v1.0\n\n" +
-                "Приложение для портфолио фотографов\n" +
-                "Дипломный проект\n\n" +
-                "© 2026 Все права защищены",
-                "О программе",
-                MessageBoxButton.OK,
-                MessageBoxImage.Information);
-        }
-
-        private void PhotoContextMenu_Click(object sender, RoutedEventArgs e)
-        {
-            if (sender is Button button && button.DataContext is Photo photo)
-            {
-                var contextMenu = new ContextMenu();
-
-                var viewItem = new MenuItem { Header = "Просмотр" };
-                viewItem.Click += (s, args) => ViewPhoto(photo);
-
-                var shareItem = new MenuItem { Header = "Поделиться" };
-                shareItem.Click += (s, args) => SharePhoto(photo);
-
-                var deleteItem = new MenuItem { Header = "Удалить" };
-                deleteItem.Click += (s, args) => ViewModel?.DeletePhotoCommand.Execute(photo);
-
-                contextMenu.Items.Add(viewItem);
-                contextMenu.Items.Add(new Separator());
-                contextMenu.Items.Add(shareItem);
-                contextMenu.Items.Add(new Separator());
-                contextMenu.Items.Add(deleteItem);
-
-                contextMenu.IsOpen = true;
-            }
-        }
-
-        private void ViewPhoto(Photo photo)
-        {
-            MessageBox.Show($"Просмотр: {photo.OriginalName}\n{photo.Dimensions}\n{photo.SizeDisplay}",
-                "Просмотр", MessageBoxButton.OK, MessageBoxImage.Information);
-        }
-
-        private void SharePhoto(Photo photo)
-        {
-            ShareDialog.ShowShareDialog(photo);
-        }
-
+        // Контекстное меню для папки (три точки)
         private void FolderContextMenu_Click(object sender, RoutedEventArgs e)
         {
-            if (sender is Button button && button.DataContext is Folder folder)
+            var button = sender as Button;
+            var folder = button?.DataContext as Folder;
+
+            if (folder == null) return;
+
+            var contextMenu = new ContextMenu();
+
+            // Переименовать папку
+            var renameItem = new MenuItem
             {
-                var contextMenu = new ContextMenu();
+                Header = "✏️ Переименовать",
+                Icon = new PackIcon { Kind = PackIconKind.Rename, Width = 18, Height = 18 }
+            };
+            renameItem.Click += (s, args) =>
+            {
+                ViewModel?.RenameFolderCommand.Execute(folder);
+            };
 
-                var openItem = new MenuItem { Header = "Открыть" };
-                openItem.Click += (s, args) => ViewModel?.NavigateToFolderCommand.Execute(folder);
+            // Удалить папку
+            var deleteItem = new MenuItem
+            {
+                Header = "🗑 Удалить папку",
+                Icon = new PackIcon { Kind = PackIconKind.Delete, Width = 18, Height = 18 }
+            };
+            deleteItem.Click += (s, args) =>
+            {
+                ViewModel?.DeleteFolderCommand.Execute(folder);
+            };
 
-                var shareItem = new MenuItem { Header = "Поделиться" };
-                shareItem.Click += (s, args) => ShareDialog.ShowShareDialog(folder);
+            // Поделиться папкой
+            var shareItem = new MenuItem
+            {
+                Header = "🔗 Поделиться",
+                Icon = new PackIcon { Kind = PackIconKind.Share, Width = 18, Height = 18 }
+            };
+            shareItem.Click += (s, args) =>
+            {
+                ViewModel?.ShareFolderCommand.Execute(folder);
+            };
 
-                var deleteItem = new MenuItem { Header = "Удалить" };
-                deleteItem.Click += (s, args) => ViewModel?.DeleteFolderCommand.Execute(folder);
+            contextMenu.Items.Add(renameItem);
+            contextMenu.Items.Add(deleteItem);
+            contextMenu.Items.Add(new Separator());
+            contextMenu.Items.Add(shareItem);
 
-                contextMenu.Items.Add(openItem);
-                contextMenu.Items.Add(new Separator());
-                contextMenu.Items.Add(shareItem);
-                contextMenu.Items.Add(new Separator());
-                contextMenu.Items.Add(deleteItem);
-
-                contextMenu.IsOpen = true;
-            }
+            contextMenu.IsOpen = true;
         }
 
-        private void Window_KeyDown(object sender, KeyEventArgs e)
+        // Контекстное меню для фото (три точки)
+        private void PhotoContextMenu_Click(object sender, RoutedEventArgs e)
         {
-            if (Keyboard.Modifiers == ModifierKeys.Control)
+            var button = sender as Button;
+            var photo = button?.DataContext as Photo;
+
+            if (photo == null) return;
+
+            var contextMenu = new ContextMenu();
+
+            // Экспортировать фото (одно)
+            var exportItem = new MenuItem
             {
-                switch (e.Key)
-                {
-                    case Key.N:
-                        ViewModel?.CreateFolderCommand.Execute(null);
-                        break;
-                    case Key.I:
-                        ViewModel?.OpenImportWindow();
-                        break;
-                    case Key.E:
-                        ViewModel?.OpenExportWindow();
-                        break;
-                    case Key.A:
-                        ViewModel?.SelectAllPhotos();
-                        break;
-                    case Key.F5:
-                        ViewModel?.RefreshCommand.Execute(null);
-                        break;
-                }
-            }
+                Header = "📥 Экспортировать фото",
+                Icon = new PackIcon { Kind = PackIconKind.Download, Width = 18, Height = 18 }
+            };
+            exportItem.Click += (s, args) =>
+            {
+                ViewModel?.ExportSinglePhotoCommand.Execute(photo);
+            };
+
+            // Поделиться фото
+            var shareItem = new MenuItem
+            {
+                Header = "🔗 Поделиться",
+                Icon = new PackIcon { Kind = PackIconKind.Share, Width = 18, Height = 18 }
+            };
+            shareItem.Click += (s, args) =>
+            {
+                ViewModel?.SharePhotoCommand.Execute(photo);
+            };
+
+            // Удалить фото
+            var deleteItem = new MenuItem
+            {
+                Header = "🗑 Удалить фото",
+                Icon = new PackIcon { Kind = PackIconKind.Delete, Width = 18, Height = 18 }
+            };
+            deleteItem.Click += (s, args) =>
+            {
+                ViewModel?.DeletePhotoCommand.Execute(photo);
+            };
+
+            contextMenu.Items.Add(exportItem);
+            contextMenu.Items.Add(new Separator());
+            contextMenu.Items.Add(shareItem);
+            contextMenu.Items.Add(deleteItem);
+
+            contextMenu.IsOpen = true;
+        }
+
+        // Обработчик двойного клика по фото (можно открыть просмотр)
+        private void PhotoDoubleClick(object sender, MouseButtonEventArgs e)
+        {
+            var button = sender as Button;
+            var photo = button?.DataContext as Photo;
+
+            if (photo == null) return;
+
+            // Здесь можно открыть окно просмотра фото
+            // Например: new PhotoViewerWindow(photo).ShowDialog();
         }
     }
 }

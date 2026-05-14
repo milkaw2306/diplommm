@@ -21,8 +21,12 @@
         {
             get
             {
-                if (_thumbnail == null && ThumbnailData != null)
-                    _thumbnail = Helpers.ImageHelper.BytesToImage(ThumbnailData);
+                if (_thumbnail == null)
+                {
+                    _thumbnail = Helpers.ImageHelper.BytesToImage(ThumbnailData)
+                        ?? Helpers.ImageHelper.BytesToImage(FileData);
+                }
+
                 return _thumbnail;
             }
             set { _thumbnail = value; OnPropertyChanged(); }

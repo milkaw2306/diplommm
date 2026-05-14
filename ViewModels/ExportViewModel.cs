@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using System.Windows;
@@ -14,7 +15,6 @@ namespace Diploma.ViewModels
         private readonly ExportService? _exportService;
         private readonly List<int> _selectedPhotoIds;
         private readonly int? _folderId;
-        private readonly string? _folderName;
 
         [ObservableProperty]
         private string _exportPath = string.Empty;
@@ -31,30 +31,31 @@ namespace Diploma.ViewModels
         [ObservableProperty]
         private int _exportProgress;
 
-        // Конструктор по умолчанию для дизайнера XAML
+        // Конструктор по умолчанию
         public ExportViewModel()
         {
             _selectedPhotoIds = new List<int>();
             _folderId = null;
-            _folderName = null;
             _exportService = null;
-            ExportInfo = "Выберите папку для экспорта";
+            ExportInfo = "Нет фото для экспорта";
         }
 
-        // Конструктор для экспорта выбранных фото
+        // Конструктор для экспорта выбранных фото (включая одно)
         public ExportViewModel(List<int> selectedPhotoIds, string connectionString)
         {
-            _selectedPhotoIds = selectedPhotoIds;
+            _selectedPhotoIds = selectedPhotoIds ?? new List<int>();
             _exportService = new ExportService(connectionString);
             _folderId = null;
-            ExportInfo = $"Выбрано фото: {selectedPhotoIds.Count} шт.";
+
+            int count = _selectedPhotoIds.Count;
+            ExportInfo = count == 1 ? "Выбрано: 1 фото" : $"Выбрано фото: {count} шт.";
+            StatusText = count > 0 ? "Готов к экспорту" : "Нет фото для экспорта";
         }
 
-        // Конструктор для экспорта целой папки
+        // Конструктор для экспорта папки
         public ExportViewModel(int folderId, string folderName, string connectionString)
         {
             _folderId = folderId;
-            _folderName = folderName;
             _selectedPhotoIds = new List<int>();
             _exportService = new ExportService(connectionString);
             ExportInfo = $"Экспорт папки: {folderName}";
@@ -110,7 +111,8 @@ namespace Diploma.ViewModels
                 else if (_selectedPhotoIds.Any())
                 {
                     result = await _exportService.ExportPhotos(_selectedPhotoIds, ExportPath);
-                    StatusText = result ? "Фото экспортированы!" : "Ошибка при экспорте фото";
+                    string photoWord = _selectedPhotoIds.Count == 1 ? "фото" : "фото";
+                    StatusText = result ? $"{_selectedPhotoIds.Count} {photoWord} экспортировано!" : "Ошибка при экспорте";
                 }
             }
             catch (Exception ex)

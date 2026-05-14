@@ -259,6 +259,25 @@ namespace Diploma.ViewModels
         }
 
         [RelayCommand]
+        public async Task ExportSinglePhotoAsync(Photo? photo)
+        {
+            if (photo == null)
+            {
+                MessageBox.Show("Фото не выбрано!", "Ошибка",
+                    MessageBoxButton.OK, MessageBoxImage.Warning);
+                return;
+            }
+
+            // Создаем список с одним фото
+            var selectedIds = new List<int> { photo.PhotoId };
+
+            var exportWindow = new Views.ExportWindow(selectedIds, App.ConnectionString);
+            exportWindow.Owner = Application.Current.MainWindow;
+            exportWindow.ShowDialog();
+
+            await Task.CompletedTask;
+        }
+        [RelayCommand]
         public void ShareFolder(Folder? folder)
         {
             if (folder != null)

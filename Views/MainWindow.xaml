@@ -16,6 +16,7 @@
 
     <Window.Resources>
         <converters:CollageTileSizeConverter x:Key="CollageTileSizeConverter"/>
+        <BooleanToVisibilityConverter x:Key="BoolToVisibilityConverter"/>
     </Window.Resources>
 
     <Grid Background="#F5F2EC">
@@ -25,6 +26,7 @@
             <RowDefinition Height="Auto"/>
         </Grid.RowDefinitions>
 
+        <!-- Верхняя панель -->
         <Border Grid.Row="0"
                 Padding="24,18"
                 Background="#FFFDF8"
@@ -125,12 +127,14 @@
             </Grid>
         </Border>
 
+        <!-- Основная область -->
         <Grid Grid.Row="1">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="300"/>
                 <ColumnDefinition Width="*"/>
             </Grid.ColumnDefinitions>
 
+            <!-- Левая панель -->
             <Border Grid.Column="0"
                     Margin="24"
                     Padding="18"
@@ -193,6 +197,7 @@
                 </DockPanel>
             </Border>
 
+            <!-- Правая область -->
             <Grid Grid.Column="1" Margin="0,24,24,24">
                 <Grid.RowDefinitions>
                     <RowDefinition Height="Auto"/>
@@ -231,103 +236,85 @@
                     </Grid>
                 </Border>
 
-                <!-- Вот исправленный ScrollViewer с нормальным отображением плиткой -->
-                <ScrollViewer Grid.Row="1" 
-                              Margin="0,18,0,0" 
-                              VerticalScrollBarVisibility="Auto"
-                              HorizontalScrollBarVisibility="Disabled">
-                    <ItemsControl ItemsSource="{Binding Photos}">
-                        <ItemsControl.ItemsPanel>
-                            <ItemsPanelTemplate>
-                                <WrapPanel Orientation="Horizontal" 
-                                          HorizontalAlignment="Stretch"
-                                          VerticalAlignment="Top"/>
-                            </ItemsPanelTemplate>
-                        </ItemsControl.ItemsPanel>
+                <ListBox Grid.Row="1" 
+         Margin="0,18,0,0"
+         ItemsSource="{Binding Photos}"
+         Background="Transparent"
+         BorderThickness="0"
+         ScrollViewer.HorizontalScrollBarVisibility="Disabled"
+         ScrollViewer.VerticalScrollBarVisibility="Auto">
 
-                        <ItemsControl.ItemTemplate>
-                            <DataTemplate>
-                                <Button Command="{Binding DataContext.SelectPhotoCommand, RelativeSource={RelativeSource AncestorType=Window}}"
-                                        CommandParameter="{Binding}"
-                                        Padding="0"
-                                        Margin="0,0,18,18"
-                                        Background="Transparent"
-                                        BorderThickness="0"
-                                        Cursor="Hand">
+                    <ListBox.ItemsPanel>
+                        <ItemsPanelTemplate>
+                            <WrapPanel Orientation="Horizontal"
+                       HorizontalAlignment="Left"
+                       VerticalAlignment="Top"/>
+                        </ItemsPanelTemplate>
+                    </ListBox.ItemsPanel>
 
-                                    <Border Width="250"
-                                            Height="300"
-                                            Background="White"
-                                            CornerRadius="10"
-                                            ClipToBounds="True"
-                                            BorderBrush="#E4E7EC"
-                                            BorderThickness="1">
+                    <ListBox.ItemTemplate>
+                        <DataTemplate>
+                            <Border Width="240"
+                    Height="280"
+                    Background="White"
+                    CornerRadius="10"
+                    BorderBrush="#E4E7EC"
+                    BorderThickness="1"
+                    Margin="8">
 
-                                        <Grid>
-                                            <Grid.RowDefinitions>
-                                                <RowDefinition Height="200"/>
-                                                <RowDefinition Height="*"/>
-                                            </Grid.RowDefinitions>
+                                <Grid>
+                                    <Grid.RowDefinitions>
+                                        <RowDefinition Height="190"/>
+                                        <RowDefinition Height="Auto"/>
+                                    </Grid.RowDefinitions>
 
-                                            <!-- Фото -->
-                                            <Border Grid.Row="0" Background="#F8FAFC">
-                                                <Image Source="{Binding Thumbnail}" 
-                                                       Stretch="UniformToFill"
-                                                       StretchDirection="DownOnly"/>
-                                            </Border>
-
-                                            <!-- Информация -->
-                                            <Border Grid.Row="1" Padding="10,8,10,10" Background="White">
-                                                <StackPanel>
-                                                    <TextBlock Text="{Binding OriginalName}"
-                                                               Foreground="#1F2933"
-                                                               FontWeight="SemiBold"
-                                                               FontSize="12"
-                                                               TextTrimming="CharacterEllipsis"
-                                                               MaxHeight="30"/>
-
-                                                    <TextBlock Text="{Binding Dimensions}"
-                                                               Foreground="#667085"
-                                                               FontSize="10"
-                                                               Margin="0,4,0,0"/>
-                                                </StackPanel>
-                                            </Border>
-
-                                            <!-- Кнопка меню -->
-                                            <Button Click="PhotoContextMenu_Click"
-                                                    Width="28"
-                                                    Height="28"
-                                                    HorizontalAlignment="Right"
-                                                    VerticalAlignment="Top"
-                                                    Margin="6"
-                                                    Background="#CCFFFFFF"
-                                                    BorderThickness="0">
-                                                <materialDesign:PackIcon Kind="DotsVertical" 
-                                                                         Width="14" 
-                                                                         Height="14" 
-                                                                         Foreground="#1F2933"/>
-                                            </Button>
-                                        </Grid>
-
-                                        <Border.Style>
-                                            <Style TargetType="Border">
-                                                <Style.Triggers>
-                                                    <Trigger Property="IsMouseOver" Value="True">
-                                                        <Setter Property="BorderBrush" Value="#0F766E"/>
-                                                        <Setter Property="BorderThickness" Value="2"/>
-                                                    </Trigger>
-                                                </Style.Triggers>
-                                            </Style>
-                                        </Border.Style>
+                                    <!-- Фото -->
+                                    <Border Grid.Row="0" 
+                            Background="#F8FAFC"
+                            CornerRadius="10,10,0,0">
+                                        <Image Source="{Binding Thumbnail}"
+                               Stretch="Uniform"
+                               StretchDirection="DownOnly"/>
                                     </Border>
-                                </Button>
-                            </DataTemplate>
-                        </ItemsControl.ItemTemplate>
-                    </ItemsControl>
-                </ScrollViewer>
+
+                                    <!-- Информация -->
+                                    <StackPanel Grid.Row="1" 
+                                Margin="10,8,10,10">
+                                        <TextBlock Text="{Binding OriginalName}"
+                                   Foreground="#1F2933"
+                                   FontWeight="SemiBold"
+                                   FontSize="11"
+                                   TextTrimming="CharacterEllipsis"/>
+
+                                        <TextBlock Text="{Binding Dimensions}"
+                                   Foreground="#667085"
+                                   FontSize="10"
+                                   Margin="0,4,0,0"/>
+                                    </StackPanel>
+
+                                    <!-- Кнопка меню -->
+                                    <Button Click="PhotoContextMenu_Click"
+                            Width="26"
+                            Height="26"
+                            HorizontalAlignment="Right"
+                            VerticalAlignment="Top"
+                            Margin="6"
+                            Background="#E6F2EF"
+                            BorderThickness="0">
+                                        <materialDesign:PackIcon Kind="DotsVertical" 
+                                                 Width="12" 
+                                                 Height="12" 
+                                                 Foreground="#174A41"/>
+                                    </Button>
+                                </Grid>
+                            </Border>
+                        </DataTemplate>
+                    </ListBox.ItemTemplate>
+                </ListBox>
             </Grid>
         </Grid>
 
+        <!-- Нижняя панель -->
         <StatusBar Grid.Row="2" Background="#FFFDF8" BorderBrush="#E4DED2" BorderThickness="0,1,0,0">
             <StatusBarItem>
                 <TextBlock Text="{Binding UserName, StringFormat=Пользователь: {0}}" Foreground="#344054"/>

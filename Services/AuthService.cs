@@ -1,8 +1,9 @@
-﻿using System;
-using System.Threading.Tasks;
-using MySql.Data.MySqlClient;
-using Dapper;
+﻿using Dapper;
 using Diploma.Models;
+using Diploma.Services;
+using MySql.Data.MySqlClient;
+using System;
+using System.Threading.Tasks;
 
 namespace Diploma.Services
 {
@@ -71,7 +72,30 @@ namespace Diploma.Services
                 "UPDATE Users SET ResetCode = @ResetCode, ResetCodeExpiry = DATE_ADD(NOW(), INTERVAL 15 MINUTE) WHERE UserId = @UserId",
                 new { ResetCode = resetCode, UserId = user.UserId });
 
-            await _emailService.SendEmailAsync(email, "Сброс пароля", $"Код: {resetCode}");
+            string subject = "Diplom_zxc - Восстановление пароля";
+            string body = $@"
+                <html>
+                <body style='font-family: Arial, sans-serif;'>
+                    <div style='max-width: 500px; margin: 0 auto; padding: 20px;'>
+                        <h2 style='color: #673AB7;'>Восстановление пароля</h2>
+                        <p>Здравствуйте, <b>{user.Username}</b>!</p>
+                        <p>Вы запросили восстановление пароля в приложении <b>Diplom_zxc</b>.</p>
+                        <div style='background: #f5f5f5; padding: 20px; border-radius: 10px; text-align: center; margin: 20px 0;'>
+                            <p style='font-size: 14px; color: #666;'>Ваш код для сброса пароля:</p>
+                            <p style='font-size: 32px; font-weight: bold; color: #673AB7; letter-spacing: 10px;'>{resetCode}</p>
+                        </div>
+                        <p style='color: #999; font-size: 12px;'>Код действителен в течение <b>15 минут</b>.</p>
+                        <p style='color: #999; font-size: 12px;'>Если вы не запрашивали сброс пароля, просто проигнорируйте это письмо.</p>
+                        <hr style='border: none; border-top: 1px solid #eee; margin: 20px 0;'/>
+                        <p style='color: #999; font-size: 11px;'>С уважением, команда Diplom_zxc</p>
+                    </div>
+                </body>
+                </html>";
+
+            bool sent = await _emailService.SendEmailAsync(email, subject, body);
+
+            if (!sent)
+                throw new Exception("Не удалось отправить письмо. Проверьте настройки SMTP.");
         }
 
         public async Task<bool> ResetPasswordAsync(string email, string code, string newPassword)

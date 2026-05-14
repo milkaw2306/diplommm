@@ -1,0 +1,157 @@
+<Window x:Class="Diploma.Views.ShareDialog"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:viewModels="clr-namespace:Diploma.ViewModels"
+        xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
+        Title="Поделиться"
+        Height="660" Width="500"
+        WindowStartupLocation="CenterOwner"
+        ResizeMode="NoResize">
+
+    <Window.DataContext>
+        <viewModels:ShareViewModel/>
+    </Window.DataContext>
+
+    <Grid Background="#F5F2EC">
+        <Border Margin="22"
+                Padding="26"
+                Background="#FFFDF8"
+                BorderBrush="#E4DED2"
+                BorderThickness="1"
+                CornerRadius="8">
+            <StackPanel>
+                <StackPanel Orientation="Horizontal">
+                    <Border Width="44" Height="44" Background="#174A41" CornerRadius="6">
+                        <materialDesign:PackIcon Kind="ShareVariant"
+                                                 Width="23"
+                                                 Height="23"
+                                                 Foreground="White"
+                                                 HorizontalAlignment="Center"
+                                                 VerticalAlignment="Center"/>
+                    </Border>
+                    <StackPanel Margin="14,0,0,0" VerticalAlignment="Center">
+                        <TextBlock Text="Поделиться"
+                                   FontSize="24"
+                                   FontWeight="SemiBold"
+                                   Foreground="#1F2933"/>
+                        <TextBlock Text="{Binding SharedItemName}"
+                                   Foreground="#667085"
+                                   TextTrimming="CharacterEllipsis"/>
+                    </StackPanel>
+                </StackPanel>
+
+                <Border Background="#F2F7F5"
+                        Padding="14"
+                        CornerRadius="8"
+                        Margin="0,22,0,14">
+                    <StackPanel>
+                        <CheckBox Content="Ограничить срок действия семью днями"
+                                  IsChecked="{Binding HasExpiry}"
+                                  Foreground="#344054"/>
+                        <TextBlock Margin="0,8,0,0"
+                                   Foreground="#667085"
+                                   Text="{Binding ExpiryDate, StringFormat=Действует до: {0:dd.MM.yyyy HH:mm}}"/>
+                    </StackPanel>
+                </Border>
+
+                <Button Command="{Binding CreateShareLinkCommand}"
+                        Height="44"
+                        Background="#0F766E"
+                        Foreground="White"
+                        BorderThickness="0"
+                        Margin="0,0,0,16">
+                    <StackPanel Orientation="Horizontal">
+                        <materialDesign:PackIcon Kind="LinkVariantPlus" Width="20" Height="20" Margin="0,0,8,0"/>
+                        <TextBlock Text="Создать код доступа"/>
+                    </StackPanel>
+                </Button>
+
+                <Border Background="#FFFFFF"
+                        BorderBrush="#D0D5DD"
+                        BorderThickness="1"
+                        Padding="16"
+                        CornerRadius="8">
+                    <StackPanel>
+                        <TextBlock Text="Код доступа"
+                                   FontWeight="SemiBold"
+                                   Foreground="#1F2933"/>
+                        <TextBox Text="{Binding ShareCode, UpdateSourceTrigger=PropertyChanged}"
+                                 Height="42"
+                                 Margin="0,8,0,12"
+                                 IsReadOnly="True"
+                                 FontSize="18"
+                                 FontWeight="SemiBold"
+                                 HorizontalContentAlignment="Center"
+                                 BorderBrush="#0F766E"
+                                 BorderThickness="1.5"
+                                 Background="#F8FAFC"/>
+
+                        <TextBlock Text="Email получателя"
+                                   FontWeight="SemiBold"
+                                   Foreground="#1F2933"/>
+                        <TextBox Text="{Binding RecipientEmail, UpdateSourceTrigger=PropertyChanged}"
+                                 Height="42"
+                                 Margin="0,8,0,14"
+                                 Padding="12,8"
+                                 materialDesign:HintAssist.Hint="name@example.com"
+                                 BorderBrush="#CBD5E1"
+                                 BorderThickness="1"
+                                 Background="White"/>
+
+                        <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
+                            <Button Command="{Binding CopyLinkCommand}"
+                                    Height="38"
+                                    Margin="0,0,8,0"
+                                    Padding="12,0"
+                                    Background="#E6F2EF"
+                                    Foreground="#174A41"
+                                    BorderThickness="0">
+                                <StackPanel Orientation="Horizontal">
+                                    <materialDesign:PackIcon Kind="ContentCopy" Width="18" Height="18" Margin="0,0,6,0"/>
+                                    <TextBlock Text="Копировать"/>
+                                </StackPanel>
+                            </Button>
+                            <Button Command="{Binding ShareViaEmailCommand}"
+                                    Height="38"
+                                    Padding="12,0"
+                                    Background="#174A41"
+                                    Foreground="White"
+                                    BorderThickness="0">
+                                <StackPanel Orientation="Horizontal">
+                                    <materialDesign:PackIcon Kind="EmailSend" Width="18" Height="18" Margin="0,0,6,0"/>
+                                    <TextBlock Text="Отправить"/>
+                                </StackPanel>
+                            </Button>
+                        </StackPanel>
+                    </StackPanel>
+                </Border>
+
+                <TextBlock Text="{Binding ErrorMessage}"
+                           Foreground="#B42318"
+                           TextWrapping="Wrap"
+                           Margin="0,12,0,0"
+                           Visibility="{Binding HasError, Converter={StaticResource BoolToVisibilityConverter}}"/>
+                <TextBlock Text="{Binding StatusText}"
+                           Foreground="#667085"
+                           Margin="0,10,0,0"
+                           HorizontalAlignment="Center"/>
+                <ProgressBar IsIndeterminate="{Binding IsCreating}"
+                             Visibility="{Binding IsCreating, Converter={StaticResource BoolToVisibilityConverter}}"
+                             Height="6"
+                             Margin="0,12,0,0"
+                             Foreground="#0F766E"/>
+
+                <Button Content="Закрыть"
+                        Command="{Binding CloseWindowCommand}"
+                        Height="38"
+                        Width="110"
+                        Margin="0,18,0,0"
+                        HorizontalAlignment="Right"
+                        Background="Transparent"
+                        Foreground="#344054"
+                        BorderBrush="#D0D5DD"
+                        BorderThickness="1"/>
+            </StackPanel>
+        </Border>
+    </Grid>
+</Window>

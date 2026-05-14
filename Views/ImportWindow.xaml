@@ -1,0 +1,168 @@
+<Window x:Class="Diploma.Views.ImportWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:viewModels="clr-namespace:Diploma.ViewModels"
+        xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
+        Title="Импорт фотографий"
+        Height="720" Width="620"
+        WindowStartupLocation="CenterOwner"
+        ResizeMode="NoResize">
+
+    <Window.DataContext>
+        <viewModels:ImportViewModel/>
+    </Window.DataContext>
+
+    <Grid Background="#F5F2EC">
+        <Border Margin="24"
+            Padding="28"
+            Background="#FFFDF8"
+            BorderBrush="#E4DED2"
+            BorderThickness="1"
+            CornerRadius="8">
+            <Grid>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="*"/>
+                    <RowDefinition Height="Auto"/>
+                </Grid.RowDefinitions>
+
+                <StackPanel>
+                    <TextBlock Text="Импорт фотографий"
+                           FontSize="26"
+                           FontWeight="SemiBold"
+                           Foreground="#1F2933"/>
+                    <TextBlock Text="{Binding TargetFolderName, StringFormat=Папка: {0}}"
+                           Margin="0,6,0,0"
+                           Foreground="#667085"/>
+                </StackPanel>
+
+                <Border Grid.Row="1"
+                    Margin="0,24,0,0"
+                    Padding="20"
+                    Background="#F2F7F5"
+                    BorderBrush="#BFD8CC"
+                    BorderThickness="1"
+                    CornerRadius="8">
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="Auto"/>
+                            <ColumnDefinition Width="*"/>
+                        </Grid.ColumnDefinitions>
+                        <Border Width="52"
+                            Height="52"
+                            Background="#0F766E"
+                            CornerRadius="6">
+                            <materialDesign:PackIcon Kind="ImageMultiple"
+                                                 Width="26"
+                                                 Height="26"
+                                                 Foreground="White"
+                                                 HorizontalAlignment="Center"
+                                                 VerticalAlignment="Center"/>
+                        </Border>
+                        <StackPanel Grid.Column="1" Margin="16,0,0,0" VerticalAlignment="Center">
+                            <TextBlock Text="Фото попадут в выбранную папку"
+                                   FontWeight="SemiBold"
+                                   Foreground="#1F2933"/>
+                            <TextBlock Text="Теги сохранятся у каждой фотографии и уже участвуют в поиске."
+                                   Margin="0,4,0,0"
+                                   Foreground="#667085"
+                                   TextWrapping="Wrap"/>
+                        </StackPanel>
+                    </Grid>
+                </Border>
+
+                <StackPanel Grid.Row="2" Margin="0,22,0,0">
+                    <TextBlock Text="Теги для этой загрузки"
+                           FontWeight="SemiBold"
+                           Foreground="#1F2933"/>
+                    <TextBox Text="{Binding Tags, UpdateSourceTrigger=PropertyChanged}"
+                         Margin="0,8,0,0"
+                         MinHeight="46"
+                         Padding="12,10"
+                         BorderBrush="#CBD5E1"
+                         BorderThickness="1"
+                         Background="White"
+                         materialDesign:HintAssist.Hint="портрет, лето, студия"
+                         TextWrapping="Wrap"/>
+                </StackPanel>
+
+                <Border Grid.Row="3"
+                    Margin="0,18,0,0"
+                    Padding="18"
+                    BorderBrush="#D0D5DD"
+                    BorderThickness="1.5"
+                    Background="#FFFFFF"
+                    CornerRadius="8">
+                    <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center">
+                        <materialDesign:PackIcon Kind="TrayArrowUp"
+                                             Width="38"
+                                             Height="38"
+                                             Foreground="#0F766E"
+                                             HorizontalAlignment="Center"/>
+                        <TextBlock Text="Выберите папку или отдельные изображения"
+                               Margin="0,12,0,4"
+                               FontWeight="SemiBold"
+                               HorizontalAlignment="Center"
+                               Foreground="#1F2933"/>
+                        <TextBlock Text="JPG, JPEG, PNG, BMP, GIF"
+                               Foreground="#667085"
+                               HorizontalAlignment="Center"/>
+                    </StackPanel>
+                </Border>
+
+                <StackPanel Grid.Row="4" Margin="0,18,0,0">
+                    <TextBlock Text="{Binding ErrorMessage}"
+                           Foreground="#B42318"
+                           TextWrapping="Wrap"
+                           Visibility="{Binding HasError, Converter={StaticResource BoolToVisibilityConverter}}"/>
+
+                    <Border Margin="0,10,0,14"
+                        Padding="14"
+                        Background="#F8FAFC"
+                        CornerRadius="8"
+                        Visibility="{Binding IsImporting, Converter={StaticResource BoolToVisibilityConverter}}">
+                        <StackPanel>
+                            <TextBlock Text="{Binding StatusText}" Foreground="#344054"/>
+                            <ProgressBar Value="{Binding ProgressValue}"
+                                     Maximum="{Binding TotalFiles}"
+                                     Height="8"
+                                     Margin="0,10,0,8"
+                                     Foreground="#0F766E"/>
+                            <TextBlock Text="{Binding CurrentFile}"
+                                   TextTrimming="CharacterEllipsis"
+                                   Foreground="#667085"/>
+                        </StackPanel>
+                    </Border>
+
+                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
+                        <Button Command="{Binding ImportFolderCommand}"
+                            Height="42"
+                            Margin="0,0,10,0"
+                            Padding="14,0"
+                            Background="#174A41"
+                            Foreground="White"
+                            BorderThickness="0">
+                            <StackPanel Orientation="Horizontal">
+                                <materialDesign:PackIcon Kind="FolderUpload" Width="20" Height="20" Margin="0,0,8,0"/>
+                                <TextBlock Text="Импорт папки"/>
+                            </StackPanel>
+                        </Button>
+                        <Button Command="{Binding ImportFilesCommand}"
+                            Height="42"
+                            Padding="14,0"
+                            Background="#0F766E"
+                            Foreground="White"
+                            BorderThickness="0">
+                            <StackPanel Orientation="Horizontal">
+                                <materialDesign:PackIcon Kind="ImagePlus" Width="20" Height="20" Margin="0,0,8,0"/>
+                                <TextBlock Text="Импорт файлов"/>
+                            </StackPanel>
+                        </Button>
+                    </StackPanel>
+                </StackPanel>
+            </Grid>
+        </Border>
+    </Grid>
+</Window>

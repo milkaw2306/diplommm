@@ -223,7 +223,6 @@ namespace Diploma.ViewModels
         [RelayCommand]
         public void OpenExportWindow()
         {
-            // Если есть выбранные фото - экспортируем их
             if (SelectedPhotos.Count > 0)
             {
                 var selectedIds = SelectedPhotos.Select(p => p.PhotoId).ToList();
@@ -231,7 +230,6 @@ namespace Diploma.ViewModels
                 exportWindow.Owner = Application.Current.MainWindow;
                 exportWindow.ShowDialog();
             }
-            // Если нет выбранных фото, но есть открытая папка с фото - предлагаем экспорт папки
             else if (SelectedFolder != null && Photos.Count > 0)
             {
                 var result = MessageBox.Show(
